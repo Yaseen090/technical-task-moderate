@@ -21,16 +21,19 @@ npm install && npm start
 
 2. Get started
     * Signup on [Hausra](https://hasura.io/)
-    * Create a new project and connect [Heroku](https://www.heroku.com/) database
-    * Create a table, customers, add columns, id(primary key), name, email, and role
-    * Create a simple, single page using the [Chakra UI table component](https://chakra-ui.com/docs/components/table/usage)
+    * Create a new project and connect [Heroku](https://www.heroku.com/) database.
+    * Create a table, customers, add columns, id(primary key), name, email, and role and city_id (F_KEY).
+    * Create another table, cities, add columns, id(primary key), name.
+    * Add foreign key relationship betweek cities and customers where city_id is foreign key in customers table. 
+    * Create a simple, single page using the [Chakra UI table component](https://chakra-ui.com/docs/components/table/usage).
 
 3. UI Design
     * There is not much preference on UI, simple UI will be fine.
 
 4. Functional Requirements
     * Read from the customers table created earlier in the Hasura
-    * Add new record button to open popup and take input
+    * In the table, display, name, email, role and city of the customer.
+    * Add new record button to open popup and take input ( user can add, edit name, role, email and can select city from dropdown which is populated from         the cities table)
     * Be able to add new record
     * Edit Existing Records
     * Delete record
