@@ -8,12 +8,12 @@ import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
 
 //Initialize Apollo Client for hasura connection
 const client = new ApolloClient({
-  uri: "hasura_graphql_URL",
+  uri: "https://yaseen-test-01.hasura.app/v1/graphql",
   cache: new InMemoryCache({ addTypename: false }),
   headers: {
     "Access-Control-Allow-Origin": "*",
     "X-Hasura-Admin-Secret":
-      "hasura_admin_secret_here",
+      "B4gi1mKPRvnf13Bi5XrTPgtxJafkhldZHGvXtQTGQp8mS0YReLl25xx9KgrsPscN",
   },
 });
 
