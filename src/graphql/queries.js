@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import { gql, useMutation } from "@apollo/client";
 
 export const GetCustomers = gql`
 query GetCustomers {
@@ -12,3 +12,22 @@ query GetCustomers {
   }
 `;
 
+export const GetCities = gql`
+query GetCustomers {
+  cities {
+    name
+  }
+}
+`;
+
+export const AddCustomer = gql`
+mutation AddCustomers($Customer: customers_insert_input!) {
+  insert_customers(objects:[$Customer]){
+    returning{
+      city_id
+      name
+      email
+    }
+  }
+}
+`;
