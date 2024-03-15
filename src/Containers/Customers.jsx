@@ -43,24 +43,6 @@ const Customers = () => {
 
     });
 
-    // const [updateFunction] = useMutation(EditCustomer, {
-    //     variables: {
-    //         Id: state.updateId,
-    //         Customer: {
-    //             name: "Newest Customer",
-    //             email: "Newest Email",
-    //             role: "Newest Role",
-    //             city_id: 2
-
-    //         }
-    //     }
-    // });
-    // const [getCustomerById] = useQuery(GetCustomerById, {
-    //     variables: {
-    //         Id: state.updateId
-
-    //     }
-    // });
 
     const [deleteFunction] = useMutation(DeleteCustomer, {
         variables: {
@@ -74,9 +56,7 @@ const Customers = () => {
         }
     }, [data]);
 
-    // useEffect(() => {
-    //     updateFunction();
-    // }, [state.updateId]);
+  
 
     useEffect(() => {
         deleteFunction();
@@ -97,7 +77,6 @@ const Customers = () => {
     }
     const EditHandler = (id) => {
         const customer_to_edit = state.customers.find((e) => e.id == id)
-        console.log(customer_to_edit)
         setState({ ...state, show: true, editMode: true, customer_to_edit: customer_to_edit })
 
     }
@@ -105,7 +84,6 @@ const Customers = () => {
         setState({ ...state, deleteId: id })
 
     }
-    // setState({...state,customers:data.customers})
     let customers = <Spinner />
     if (!loading && !error) {
         if (!cities.loading && !cities.error) {
@@ -115,7 +93,6 @@ const Customers = () => {
             let displayValue = ''
             if (state.customer_to_edit) {
                 if (cities.data.cities[(state.customer_to_edit.city_id - 1)]) {
-                    console.log(cities.data.cities[(state.customer_to_edit.city_id - 1)])
                 displayValue=cities.data.cities[(state.customer_to_edit.city_id-1)].name
 
                 }
@@ -137,10 +114,6 @@ const Customers = () => {
                         </Stack>
                     </Flex>
 
-                    // <div>
-                    //     <h1>Customers Table</h1>
-
-                    // </div>
 
                 )
 
