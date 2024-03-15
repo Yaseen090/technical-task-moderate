@@ -1,4 +1,3 @@
-import React from 'react';
 import Customers from './Containers/Customers'
 
 function App() {
