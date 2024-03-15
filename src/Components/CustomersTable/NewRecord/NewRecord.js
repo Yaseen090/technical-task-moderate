@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Spinner from "../../../UI/Spinner/Spinner";
 import Input from "../../../UI/Input/Input";
 import Button from "../../../UI/Button/Button";
-import { AddCustomer } from "../../../graphql/queries";
+import { AddCustomer, EditCustomer } from "../../../graphql/queries";
 import { useMutation } from "@apollo/client";
 const NewRecord = (props) => {
 
-    
+    console.log(props.customer_to_edit)
     const [recordForm, setRecordForm] = useState({
         orderForm: {
             name: {
@@ -28,7 +28,7 @@ const NewRecord = (props) => {
                     type: 'email',
                     placeholder: 'Your E-Mail'
                 },
-                value: '',
+                value: "",
                 validation: {
                     required: true,
                     isEmail: true
@@ -42,7 +42,7 @@ const NewRecord = (props) => {
                     type: 'text',
                     placeholder: 'Role'
                 },
-                value: '',
+                value: "",
                 validation: {
                     required: true
                 },
@@ -52,9 +52,9 @@ const NewRecord = (props) => {
             cities: {
                 elementType: 'select',
                 elementConfig: {
-                    options:props.cities
+                    options: props.cities
                 },
-                value: 'Newyork',
+                value: '',
                 validation: {},
                 valid: true
             }
@@ -62,18 +62,54 @@ const NewRecord = (props) => {
         formIsValid: false
 
     })
+    console.log("NewRecord", props.displayCity)
+    useEffect(() => {
+        if (!loading && !error) {
+            let record = recordForm.orderForm
+            record.name.value = props.customer_to_edit.name
+            record.email.value = props.customer_to_edit.email
+            record.role.value = props.customer_to_edit.role
+            record.cities.value = props.displayCity
 
+            setRecordForm({ ...recordForm, orderForm: record })
+        }
+    }, [props.customer_to_edit]);
+    // if (props.editMode) {
+    //     let record=recordForm.orderForm
+    //     record.name.value=props.customer_to_edit.name
+    //     setRecordForm({...recordForm,orderForm:record})
+    // }
+    // if(props.editMode){
+
+    // }
+    const [updateFunction,{updateData,updateLoading,updateError}] = useMutation(EditCustomer, {
+        variables: {
+            Id: props.customer_to_edit.id,
+            Customer: {
+                name: recordForm.orderForm.name.value,
+                email: recordForm.orderForm.email.value,
+                role: recordForm.orderForm.role.value,
+                city_id: props.citiesRaw.findIndex((e) => e.name === recordForm.orderForm.cities.value) + 1
+                // (props.citiesRaw.findIndex((e)=>{return e=props.displayCity})+1)
+
+            }
+        }
+    });
     const [mutateFunction, { data, loading, error }] = useMutation(AddCustomer, {
         variables: {
-          Customer: {
-            name:recordForm.orderForm.name.value,
-            email:recordForm.orderForm.email.value,
-            role:recordForm.orderForm.role.value,
-            city_id:2
+            Customer: {
+                name: recordForm.orderForm.name.value,
+                email: recordForm.orderForm.email.value,
+                role: recordForm.orderForm.role.value,
+                city_id: props.citiesRaw.findIndex((e) => e.name === recordForm.orderForm.cities.value) + 1
+                // (props.citiesRaw.findIndex((e)=>{return e=props.displayCity})+1)
 
-          }
+            }
         }
-      });
+    });
+    // console.log("Number",props.citiesRaw.findIndex((e)=>e.name=="Newyork"))
+    console.log("Number", props.citiesRaw.findIndex((e) => e.name === recordForm.orderForm.cities.value) + 1)
+    console.log("Customer To Edit", props.customer_to_edit)
     const checkValidity = (value, rules) => {
         let isValid = true;
         if (!rules) {
@@ -105,23 +141,7 @@ const NewRecord = (props) => {
         return isValid;
     }
 
-    const orderHandler = (event) => {
-        event.preventDefault();
 
-        const formData = {};
-        for (let formElementIdentifier in this.state.orderForm) {
-            formData[formElementIdentifier] = this.state.orderForm[formElementIdentifier].value;
-        }
-        const order = {
-            ingredients: this.props.ings,
-            price: this.props.price,
-            orderData: formData,
-            userId: this.props.userId
-        }
-
-        this.props.onOrderBurger(order, this.props.token);
-
-    }
 
     const inputChangedHandler = (event, inputIdentifier) => {
         const updatedOrderForm = {
@@ -149,29 +169,59 @@ const NewRecord = (props) => {
         });
     }
 
- 
-    let form = (
-        <form onSubmit={() => mutateFunction()}>
-            {formElementsArray.map(formElement => (
-                <Input
-                    key={formElement.id}
-                    elementType={formElement.config.elementType}
-                    elementConfig={formElement.config.elementConfig}
-                    value={formElement.config.value}
-                    invalid={!formElement.config.valid}
-                    shouldValidate={formElement.config.validation}
-                    touched={formElement.config.touched}
-                    onChanged={(event) => inputChangedHandler(event, formElement.id)}
-                />
-            ))}
-            <Button>ORDER</Button>
-        </form>
-    );
+    // const addCustomerFu=()=>{
+    //     mutateFunction()
+    // }
+    const updateCustomerFu=()=>{
+        updateFunction()
+     }
+    console.log(props.editMode)
+    let form = null;
+    if (props.editMode) {
+        console.log("Edit Mode On")
+        form = (
+            <form onSubmit={updateCustomerFu}>
+                {formElementsArray.map(formElement => (
+                    <Input
+                        key={formElement.id}
+                        elementType={formElement.config.elementType}
+                        elementConfig={formElement.config.elementConfig}
+                        value={formElement.config.value}
+                        invalid={!formElement.config.valid}
+                        shouldValidate={formElement.config.validation}
+                        touched={formElement.config.touched}
+                        onChanged={(event) => inputChangedHandler(event, formElement.id)}
+                    />
+                ))}
+                <Button btnType="Success">Edit Customer</Button>
+            </form>
+        );
+    }
+    else {
+        console.log("Edit Mode Off")
 
+        form = (
+            
+            <form onSubmit={() => mutateFunction()}>
+                {formElementsArray.map(formElement => (
+                    <Input
+                        key={formElement.id}
+                        elementType={formElement.config.elementType}
+                        elementConfig={formElement.config.elementConfig}
+                        value={formElement.config.value}
+                        invalid={!formElement.config.valid}
+                        shouldValidate={formElement.config.validation}
+                        touched={formElement.config.touched}
+                        onChanged={(event) => inputChangedHandler(event, formElement.id)}
+                    />
+                ))}
+                <Button btnType="Success">Add New Customer</Button>
+            </form>
+        );
 
+    }
     return (
         <div>
-            <h1>New Form</h1>
             {form}
         </div>
     )

@@ -20,10 +20,13 @@ const customersTable = (props) => {
             email={e.email}
             role={e.role}
             city={e.city_id}
+            editClicked={()=>props.edit(e.id)}
+            deleteClicked={()=>props.delete(e.id)}
+
         />
     })
     return (
-        <TableContainer>
+        <TableContainer overflowY={'scroll'}>
             <Table variant='simple'>
                 <Thead>
                     <Tr>
@@ -32,6 +35,8 @@ const customersTable = (props) => {
                         <Th> Email</Th>
                         <Th> Role</Th>
                         <Th> City</Th>
+                        <Th> Edit/Delete</Th>
+
                     </Tr>
                 </Thead>
                 <Tbody>
