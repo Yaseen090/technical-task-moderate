@@ -19,7 +19,7 @@ const customersTable = (props) => {
             name={e.name}
             email={e.email}
             role={e.role}
-            city={e.city_id}
+            city={props.cities[(e.city_id-1)].name}
             editClicked={()=>props.edit(e.id)}
             deleteClicked={()=>props.delete(e.id)}
 

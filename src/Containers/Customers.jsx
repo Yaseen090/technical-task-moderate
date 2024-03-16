@@ -23,7 +23,7 @@ const Customers = () => {
                 name: 'Abhinav',
                 email: "yaseenburiro090@gmail.com",
                 role: "VIP",
-                city: 1
+                city_id: 1
 
 
             }
@@ -33,7 +33,7 @@ const Customers = () => {
             name: '',
             email: "",
             role: "",
-            city: 1
+            city_id: 1
         },
         editMode: false,
         updateId: 0,
@@ -108,7 +108,7 @@ const Customers = () => {
                         <Stack p="5%" bg="gray.300" w={"90vw"} h={"90vh"} rounded={"10px"} align={"center"} >
                             <Heading>Customers Table</Heading>
                             <br />
-                            <CustomersTable customers={state.customers} edit={EditHandler} delete={deleteHandler} />
+                            <CustomersTable cities={cities.data.cities} customers={state.customers} edit={EditHandler} delete={deleteHandler} />
                             <Button btnType="Success" clicked={addnewRecord}>Add New Record</Button>
 
                         </Stack>
