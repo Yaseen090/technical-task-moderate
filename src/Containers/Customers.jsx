@@ -2,7 +2,7 @@ import { Component } from "react";
 import CustomersTable from "../Components/CustomersTable/CustomersTable";
 import { useQuery } from "@apollo/client";
 import { EditCustomer, GetCities, GetCustomerById, GetCustomers } from "../graphql/queries";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useReducer } from "react";
 import { Flex, Heading, Stack, Text } from "@chakra-ui/react";
 import Spinner from "../UI/Spinner/Spinner";
 import Button from '../UI/Button/Button'
@@ -10,9 +10,11 @@ import Modal from "../UI/Modal/Modal";
 import NewRecord from "../Components/CustomersTable/NewRecord/NewRecord";
 import { useMutation } from "@apollo/client";
 import { DeleteCustomer } from "../graphql/queries";
+import DeleteModal from "../Components/DeleteModal/DeleteModal";
+
+
+
 const Customers = () => {
-
-
     const { loading, error, data } = useQuery(GetCustomers);
     const cities = useQuery(GetCities)
 
@@ -40,14 +42,18 @@ const Customers = () => {
         currentUpdateId: 0,
         deleteId: 0,
         show: false,
+        deleteShow: false,
+        deleteTouched: false
 
     });
 
-
-    const [deleteFunction] = useMutation(DeleteCustomer, {
+    const [deleteFunction, { loading: deleteLoading }] = useMutation(DeleteCustomer, {
         variables: {
             Id: state.deleteId
-        }
+        },
+        refetchQueries: [
+            { query: GetCustomers }
+        ]
     });
 
     useEffect(() => {
@@ -56,24 +62,26 @@ const Customers = () => {
         }
     }, [data]);
 
-  
+
 
     useEffect(() => {
         deleteFunction();
-    }, [state.deleteId]);
+    }, [state.deleteTouched]);
 
 
     const addnewRecord = () => {
         setState({ ...state, show: true })
     }
     const closeHandler = () => {
-        setState({ ...state, show: false,customer_to_edit:{
-            id: 1,
-            name: '',
-            email: "",
-            role: "",
-            city_id: 1
-        }, editMode: false })
+        setState({
+            ...state, show: false, customer_to_edit: {
+                id: 1,
+                name: '',
+                email: "",
+                role: "",
+                city_id: 1
+            }, editMode: false
+        })
     }
     const EditHandler = (id) => {
         const customer_to_edit = state.customers.find((e) => e.id == id)
@@ -81,8 +89,16 @@ const Customers = () => {
 
     }
     const deleteHandler = (id) => {
-        setState({ ...state, deleteId: id })
+        setState({ ...state, deleteId: id, deleteShow: true })
 
+    }
+
+    const deleteCloseHandler = () => {
+        setState({ ...state, deleteShow: false })
+    }
+    const deleteTouched = () => {
+        const deleteTouched = state.deleteTouched
+        setState({ ...state, deleteTouched: !deleteTouched })
     }
     let customers = <Spinner />
     if (!loading && !error) {
@@ -93,7 +109,7 @@ const Customers = () => {
             let displayValue = ''
             if (state.customer_to_edit) {
                 if (cities.data.cities[(state.customer_to_edit.city_id - 1)]) {
-                displayValue=cities.data.cities[(state.customer_to_edit.city_id-1)].name
+                    displayValue = cities.data.cities[(state.customer_to_edit.city_id - 1)].name
 
                 }
 
@@ -103,7 +119,10 @@ const Customers = () => {
                 customers = (
                     <Flex align={"center"} bg="gray.200" justify="center" w={"100vw"} h="100vh">
                         <Modal show={state.show} clicked={closeHandler} >
-                            <NewRecord citiesRaw ={cities.data.cities} cities={citiesmapped} displayCity={displayValue} customer_to_edit={state.customer_to_edit} editMode={state.editMode} />
+                            <NewRecord citiesRaw={cities.data.cities} cities={citiesmapped} displayCity={displayValue} customer_to_edit={state.customer_to_edit} editMode={state.editMode} />
+                        </Modal>
+                        <Modal show={state.deleteShow} clicked={deleteCloseHandler} >
+                            {deleteLoading ? <Spinner /> : <DeleteModal deleteClicked={deleteTouched} deleteCanceled={deleteCloseHandler} />}
                         </Modal>
                         <Stack p="5%" bg="gray.300" w={"90vw"} h={"90vh"} rounded={"10px"} align={"center"} >
                             <Heading>Customers Table</Heading>

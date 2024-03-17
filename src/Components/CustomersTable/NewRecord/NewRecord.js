@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Spinner from "../../../UI/Spinner/Spinner";
 import Input from "../../../UI/Input/Input";
 import Button from "../../../UI/Button/Button";
-import { AddCustomer, EditCustomer } from "../../../graphql/queries";
+import { AddCustomer, EditCustomer, GetCustomers } from "../../../graphql/queries";
 import { useMutation } from "@apollo/client";
 const NewRecord = (props) => {
 
@@ -62,18 +62,18 @@ const NewRecord = (props) => {
 
     })
     useEffect(() => {
-        if (!loading && !error) {
-            let record = recordForm.orderForm
-            record.name.value = props.customer_to_edit.name
-            record.email.value = props.customer_to_edit.email
-            record.role.value = props.customer_to_edit.role
-            record.cities.value = props.displayCity
 
-            setRecordForm({ ...recordForm, orderForm: record })
-        }
+        let record = recordForm.orderForm
+        record.name.value = props.customer_to_edit.name
+        record.email.value = props.customer_to_edit.email
+        record.role.value = props.customer_to_edit.role
+        record.cities.value = props.displayCity
+
+        setRecordForm({ ...recordForm, orderForm: record })
+
     }, [props.customer_to_edit]);
-  
-    const [updateFunction,{updateData,updateLoading,updateError}] = useMutation(EditCustomer, {
+
+    const [updateFunction, { data:updateData, loading:updateLoading, error:updateError }] = useMutation(EditCustomer, {
         variables: {
             Id: props.customer_to_edit.id,
             Customer: {
@@ -83,7 +83,10 @@ const NewRecord = (props) => {
                 city_id: props.citiesRaw.findIndex((e) => e.name === recordForm.orderForm.cities.value) + 1
 
             }
-        }
+        },
+        refetchQueries: [
+            { query: GetCustomers }
+        ]
     });
     const [mutateFunction, { data, loading, error }] = useMutation(AddCustomer, {
         variables: {
@@ -94,7 +97,10 @@ const NewRecord = (props) => {
                 city_id: props.citiesRaw.findIndex((e) => e.name === recordForm.orderForm.cities.value) + 1
 
             }
-        }
+        },
+        refetchQueries: [
+            { query: GetCustomers }
+        ]
     });
     const checkValidity = (value, rules) => {
         let isValid = true;
@@ -155,51 +161,61 @@ const NewRecord = (props) => {
         });
     }
 
- 
-    const updateCustomerFu=()=>{
+
+    const updateCustomerFu = (event) => {
+        event.preventDefault()
         updateFunction()
-     }
-    let form = null;
-    if (props.editMode) {
-        form = (
-            <form onSubmit={updateCustomerFu}>
-                {formElementsArray.map(formElement => (
-                    <Input
-                        key={formElement.id}
-                        elementType={formElement.config.elementType}
-                        elementConfig={formElement.config.elementConfig}
-                        value={formElement.config.value}
-                        invalid={!formElement.config.valid}
-                        shouldValidate={formElement.config.validation}
-                        touched={formElement.config.touched}
-                        onChanged={(event) => inputChangedHandler(event, formElement.id)}
-                    />
-                ))}
-                <Button btnType="Success">Edit Customer</Button>
-            </form>
-        );
     }
-    else {
+    const addCustomerFu = (event) => {
+        event.preventDefault()
+        mutateFunction()
+    }
+    let form = null;
+    if (loading || updateLoading) {
+        form = <Spinner/>
+    }
+    else{
+        if (props.editMode) {
+            form = (
+                <form onSubmit={updateCustomerFu}>
+                    {formElementsArray.map(formElement => (
+                        <Input
+                            key={formElement.id}
+                            elementType={formElement.config.elementType}
+                            elementConfig={formElement.config.elementConfig}
+                            value={formElement.config.value}
+                            invalid={!formElement.config.valid}
+                            shouldValidate={formElement.config.validation}
+                            touched={formElement.config.touched}
+                            onChanged={(event) => inputChangedHandler(event, formElement.id)}
+                        />
+                    ))}
+                    <Button btnType="Success">Edit Customer</Button>
+                </form>
+            );
+        }
+        else {
+            console.log(data, error)
+            form = (
 
-        form = (
-            
-            <form onSubmit={() => mutateFunction()}>
-                {formElementsArray.map(formElement => (
-                    <Input
-                        key={formElement.id}
-                        elementType={formElement.config.elementType}
-                        elementConfig={formElement.config.elementConfig}
-                        value={formElement.config.value}
-                        invalid={!formElement.config.valid}
-                        shouldValidate={formElement.config.validation}
-                        touched={formElement.config.touched}
-                        onChanged={(event) => inputChangedHandler(event, formElement.id)}
-                    />
-                ))}
-                <Button btnType="Success">Add New Customer</Button>
-            </form>
-        );
+                <form onSubmit={addCustomerFu}>
+                    {formElementsArray.map(formElement => (
+                        <Input
+                            key={formElement.id}
+                            elementType={formElement.config.elementType}
+                            elementConfig={formElement.config.elementConfig}
+                            value={formElement.config.value}
+                            invalid={!formElement.config.valid}
+                            shouldValidate={formElement.config.validation}
+                            touched={formElement.config.touched}
+                            onChanged={(event) => inputChangedHandler(event, formElement.id)}
+                        />
+                    ))}
+                    <Button btnType="Success">Add New Customer</Button>
+                </form>
+            );
 
+        }
     }
     return (
         <div>
