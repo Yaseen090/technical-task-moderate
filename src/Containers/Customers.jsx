@@ -1,7 +1,7 @@
 import { Component } from "react";
 import CustomersTable from "../Components/CustomersTable/CustomersTable";
 import { useQuery } from "@apollo/client";
-import { EditCustomer, GetCities, GetCustomerById, GetCustomers } from "../graphql/queries";
+import { EditCustomer, GetCities, GetCustomerById, GetCustomers,AddCustomer } from "../graphql/queries";
 import { useState, useEffect, useReducer } from "react";
 import { Flex, Heading, Stack, Text } from "@chakra-ui/react";
 import Spinner from "../UI/Spinner/Spinner";
@@ -53,7 +53,10 @@ const Customers = () => {
         },
         refetchQueries: [
             { query: GetCustomers }
-        ]
+        ],
+        onCompleted:()=>{
+           setState({...state,deleteShow:false})
+        }
     });
 
     useEffect(() => {
@@ -100,6 +103,61 @@ const Customers = () => {
         const deleteTouched = state.deleteTouched
         setState({ ...state, deleteTouched: !deleteTouched })
     }
+
+    const [updateFunction, { data:updateData, loading:updateLoading, error:updateError }] = useMutation(EditCustomer);
+    const [mutateFunction, { data:AddedData, loading:AddedLoading, error:AddedError }] = useMutation(AddCustomer);
+
+    const updateCustomerFu = (event,recordForm) => {
+        event.preventDefault()
+        updateFunction({
+            variables: {
+                Id: state.customer_to_edit.id,
+                Customer: {
+                    name: recordForm.orderForm.name.value,
+                    email: recordForm.orderForm.email.value,
+                    role: recordForm.orderForm.role.value,
+                    city_id: cities.data.cities.findIndex((e) => e.name === recordForm.orderForm.cities.value) + 1
+    
+                }
+            },
+            refetchQueries: [
+                { query: GetCustomers }
+            ],
+            onCompleted:()=>{
+                setState({
+                    ...state, show: false, customer_to_edit: {
+                        id: 1,
+                        name: '',
+                        email: "",
+                        role: "",
+                        city_id: 1
+                    }, editMode: false,show:false
+                })
+            }
+        })
+    }
+    const addCustomerFu = (event,recordForm) => {
+        event.preventDefault()
+        mutateFunction({
+            variables: {
+                Customer: {
+                    name: recordForm.orderForm.name.value,
+                    email: recordForm.orderForm.email.value,
+                    role: recordForm.orderForm.role.value,
+                    city_id: cities.data.cities.findIndex((e) => e.name === recordForm.orderForm.cities.value) + 1
+    
+                }
+            },
+            refetchQueries: [
+                { query: GetCustomers }
+            ],
+            onCompleted:()=>{
+                setState({...state,show:false})
+            }
+        })
+    }
+
+console.log(state.customers)
     let customers = <Spinner />
     if (!loading && !error) {
         if (!cities.loading && !cities.error) {
@@ -114,12 +172,23 @@ const Customers = () => {
                 }
 
             }
-
+            
+           
             return (
                 customers = (
                     <Flex align={"center"} bg="gray.200" justify="center" w={"100vw"} h="100vh">
                         <Modal show={state.show} clicked={closeHandler} >
-                            <NewRecord citiesRaw={cities.data.cities} cities={citiesmapped} displayCity={displayValue} customer_to_edit={state.customer_to_edit} editMode={state.editMode} />
+                            <NewRecord 
+                            citiesRaw={cities.data.cities} 
+                            cities={citiesmapped} 
+                            displayCity={displayValue} 
+                            customer_to_edit={state.customer_to_edit} 
+                            editMode={state.editMode}
+                            updateCustomerFu={updateCustomerFu}
+                            addCustomerFu={addCustomerFu}
+                            loading={AddedLoading}
+                            updateLoading={updateLoading}
+                            />
                         </Modal>
                         <Modal show={state.deleteShow} clicked={deleteCloseHandler} >
                             {deleteLoading ? <Spinner /> : <DeleteModal deleteClicked={deleteTouched} deleteCanceled={deleteCloseHandler} />}

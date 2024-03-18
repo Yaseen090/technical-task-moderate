@@ -11,8 +11,13 @@ import {
 } from '@chakra-ui/react'
 
 import CustomerRow from './CustomerRow/CustomerRow';
+
+
 const customersTable = (props) => {
-    const customers = props.customers.map(e => {
+
+    let customerslist = [...props.customers]
+    customerslist.sort((a,b)=>a.id>b.id?1:-1)
+    const customers = customerslist.map(e => {
         return <CustomerRow
             key={e.id}
             id={e.id}

@@ -73,35 +73,6 @@ const NewRecord = (props) => {
 
     }, [props.customer_to_edit]);
 
-    const [updateFunction, { data:updateData, loading:updateLoading, error:updateError }] = useMutation(EditCustomer, {
-        variables: {
-            Id: props.customer_to_edit.id,
-            Customer: {
-                name: recordForm.orderForm.name.value,
-                email: recordForm.orderForm.email.value,
-                role: recordForm.orderForm.role.value,
-                city_id: props.citiesRaw.findIndex((e) => e.name === recordForm.orderForm.cities.value) + 1
-
-            }
-        },
-        refetchQueries: [
-            { query: GetCustomers }
-        ]
-    });
-    const [mutateFunction, { data, loading, error }] = useMutation(AddCustomer, {
-        variables: {
-            Customer: {
-                name: recordForm.orderForm.name.value,
-                email: recordForm.orderForm.email.value,
-                role: recordForm.orderForm.role.value,
-                city_id: props.citiesRaw.findIndex((e) => e.name === recordForm.orderForm.cities.value) + 1
-
-            }
-        },
-        refetchQueries: [
-            { query: GetCustomers }
-        ]
-    });
     const checkValidity = (value, rules) => {
         let isValid = true;
         if (!rules) {
@@ -161,23 +132,14 @@ const NewRecord = (props) => {
         });
     }
 
-
-    const updateCustomerFu = (event) => {
-        event.preventDefault()
-        updateFunction()
-    }
-    const addCustomerFu = (event) => {
-        event.preventDefault()
-        mutateFunction()
-    }
     let form = null;
-    if (loading || updateLoading) {
+    if (props.loading || props.updateLoading) {
         form = <Spinner/>
     }
     else{
         if (props.editMode) {
             form = (
-                <form onSubmit={updateCustomerFu}>
+                <form onSubmit={(e)=>props.updateCustomerFu(e,recordForm)}>
                     {formElementsArray.map(formElement => (
                         <Input
                             key={formElement.id}
@@ -195,10 +157,9 @@ const NewRecord = (props) => {
             );
         }
         else {
-            console.log(data, error)
             form = (
 
-                <form onSubmit={addCustomerFu}>
+                <form onSubmit={(e)=>props.addCustomerFu(e,recordForm)}>
                     {formElementsArray.map(formElement => (
                         <Input
                             key={formElement.id}
