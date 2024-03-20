@@ -14,7 +14,7 @@ import DeleteModal from "../Components/DeleteModal/DeleteModal";
 
 
 
-const Customers = () => {
+const Customers = (props) => {
     const { loading, error, data } = useQuery(GetCustomers);
     const cities = useQuery(GetCities)
 
@@ -176,7 +176,7 @@ console.log(state.customers)
            
             return (
                 customers = (
-                    <Flex align={"center"} bg="gray.200" justify="center" w={"100vw"} h="100vh">
+                    <Flex  direction={"column"}align={"center"} bg="gray.200" justify="center" w={"100vw"} h="100vh">
                         <Modal show={state.show} clicked={closeHandler} >
                             <NewRecord 
                             citiesRaw={cities.data.cities} 
@@ -193,6 +193,8 @@ console.log(state.customers)
                         <Modal show={state.deleteShow} clicked={deleteCloseHandler} >
                             {deleteLoading ? <Spinner /> : <DeleteModal deleteClicked={deleteTouched} deleteCanceled={deleteCloseHandler} />}
                         </Modal>
+                        <Button btnType="Danger" clicked={props.logout}>Logout</Button>
+
                         <Stack p="5%" bg="gray.300" w={"90vw"} h={"90vh"} rounded={"10px"} align={"center"} >
                             <Heading>Customers Table</Heading>
                             <br />

@@ -1,9 +1,10 @@
 import Customers from './Containers/Customers'
+import Auth from './Containers/Auth';
 
 function App() {
   return (
     <div>
-      <Customers/>
+      <Auth/>
     </div>
   );
 }
